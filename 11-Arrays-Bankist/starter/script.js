@@ -6,31 +6,31 @@
 
 // Data
 const account1 = {
-  owner: 'Jonas Schmedtmann',
-  movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
-  interestRate: 1.2, // %
-  pin: 1111,
+    owner: 'Jonas Schmedtmann',
+    movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
+    interestRate: 1.2, // %
+    pin: 1111,
 };
 
 const account2 = {
-  owner: 'Jessica Davis',
-  movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
-  interestRate: 1.5,
-  pin: 2222,
+    owner: 'Jessica Davis',
+    movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
+    interestRate: 1.5,
+    pin: 2222,
 };
 
 const account3 = {
-  owner: 'Steven Thomas Williams',
-  movements: [200, -200, 340, -300, -20, 50, 400, -460],
-  interestRate: 0.7,
-  pin: 3333,
+    owner: 'Steven Thomas Williams',
+    movements: [200, -200, 340, -300, -20, 50, 400, -460],
+    interestRate: 0.7,
+    pin: 3333,
 };
 
 const account4 = {
-  owner: 'Sarah Smith',
-  movements: [430, 1000, 700, 50, 90],
-  interestRate: 1,
-  pin: 4444,
+    owner: 'Sarah Smith',
+    movements: [430, 1000, 700, 50, 90],
+    interestRate: 1,
+    pin: 4444,
 };
 
 const accounts = [account1, account2, account3, account4];
@@ -66,11 +66,102 @@ const inputClosePin = document.querySelector('.form__input--pin');
 // LECTURES
 
 const currencies = new Map([
-  ['USD', 'United States dollar'],
-  ['EUR', 'Euro'],
-  ['GBP', 'Pound sterling'],
+    ['USD', 'United States dollar'],
+    ['EUR', 'Euro'],
+    ['GBP', 'Pound sterling'],
 ]);
 
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+// const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+const displayMovements = function (movements) {
+    containerMovements.innerHTML = '';
+    movements.forEach((mov, i) => {
+        const _type = mov > 0 ? 'deposit' : 'withdrawal';
+        const html = `
+        <div class="movements__row">
+          <div class="movements__type movements__type--${_type}">${i + 1} ${_type}</div>
+          <div class="movements__value">${mov} 🇪🇺</div>
+        </div>
+       ` ;
+        containerMovements.insertAdjacentHTML('afterbegin', html)
+    });
+}
 
 /////////////////////////////////////////////////
+
+const createUsernames = function (accounts) {
+    accounts.forEach(account => {
+        account
+            .username = account.owner
+                .toLowerCase()
+                .split(' ')
+                .map((username) => username[0])
+                .join('')
+    });
+}
+
+createUsernames(accounts)
+
+const calcDisplayBalance = function (movements) {
+    const balance = movements.reduce((acc, mov) => {
+        return acc + mov
+    }, 0)
+    labelBalance.textContent = `${balance} EUR`
+}
+
+const calcDisplaySummary = function (account) {
+    const incomes = account.movements
+        .filter(movement => movement > 0)
+        .reduce((acc, mov) => acc + mov, 0)
+    labelSumIn.textContent = `${incomes} 🇪🇺`
+    const out = account.movements
+        .filter(movement => movement < 0)
+        .reduce((acc, mov) => acc - mov, 0)
+    labelSumOut.textContent = `${out} 🇪🇺`
+    const interest = account.movements
+        .filter(mov => mov > 0)
+        .map(deposit => (deposit * account.interestRate) / 100)
+        .filter(inter => inter >= 1)
+        .reduce((acc, inter) => acc + inter, 0)
+    labelSumInterest.textContent = `${interest} 🇪🇺`
+}
+
+const account = accounts.find(account => account.owner === 'Jessica Davis')
+console.log(account)
+
+const acc = function (accounts) {
+    for (const account of accounts) {
+        if (account.owner === 'Jessica Davis') {
+            return account
+        }
+    }
+    return null
+}
+
+let currentAccount;
+
+btnLogin.addEventListener('click', function (e) {
+    e.preventDefault();
+    currentAccount = accounts.find(account => account.username === inputLoginUsername.value)
+    if (currentAccount?.pin === Number(inputLoginPin.value)) {
+        labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`
+    }
+    containerApp.style.opacity = 100;
+
+    inputLoginPin.value = inputLoginUsername.value = ''
+    inputLoginPin.blur();
+
+    displayMovements(currentAccount.movements)
+
+    calcDisplayBalance(currentAccount.movements)
+
+    calcDisplaySummary(currentAccount)
+})
+
+
+btnTransfer.addEventListener('click', function (e) {
+    e.preventDefault();
+    const amount = Number(inputTransferAmount.value)
+    const receiverAcc = accounts.find(acc => acc.username === inputTransferTo.value)
+    console.log(amount, receiverAcc)
+})
