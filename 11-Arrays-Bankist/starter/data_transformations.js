@@ -61,3 +61,20 @@ console.log(totalDepositsUSD)
 
 const firstWithdrawal = movements.find(move => move < 0)
 console.log(firstWithdrawal)
+
+
+const owners = ['Jonas', 'Zach', 'Adam', 'Martha']
+
+console.log(owners.sort())
+
+movements.sort((a, b) => a - b)
+console.log(movements)
+
+movements.sort((a, b) => a > b)
+console.log(movements)
+
+movements.sort((a, b) => {
+    if (a < b) return -1
+    return 1
+})
+console.log(movements)
