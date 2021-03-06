@@ -73,9 +73,12 @@ const currencies = new Map([
 
 // const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
-const displayMovements = function (movements) {
+const displayMovements = function (movements, sort = false) {
+
+    const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
     containerMovements.innerHTML = '';
-    movements.forEach((mov, i) => {
+    movs.forEach((mov, i) => {
         const _type = mov > 0 ? 'deposit' : 'withdrawal';
         const html = `
         <div class="movements__row">
@@ -209,3 +212,75 @@ btnClose.addEventListener('click', (e) => {
 
     inputCloseUsername.value = inputClosePin.value = ''
 })
+
+let sorted = false;
+
+btnSort.addEventListener('click', (e) => {
+    e.preventDefault();
+    sorted = !sorted
+    displayMovements(currentAccount.movements, sorted);
+})
+
+labelBalance.addEventListener('click', (e) => {
+    const movementsUI = Array.from(document.querySelectorAll('.movements__value'),
+        el => Number(el.textContent.slice(0, -5))
+    )
+    console.log(movementsUI)
+})
+
+//1.
+const bankDepositSum = accounts.flatMap(acc => acc.movements)
+    .filter(mov => mov > 0)
+    .reduce((acc, cur) => acc + cur, 0)
+
+console.log(bankDepositSum)
+
+const bankDepositSum_red = accounts.flatMap(acc => acc.movements)
+    .reduce((acc, mov) => {
+        acc = mov > 0 ? acc + mov : acc;
+        return acc
+    }, 0)
+
+console.log(bankDepositSum_red)
+
+//2.
+
+const numDeposits1000 = accounts.flatMap(acc => acc.movements)
+    .filter(mov => mov >= 1000).length
+
+console.log(numDeposits1000)
+
+const numDeposits1000_1 = accounts.flatMap(acc => acc.movements)
+    .reduce((count, cur) => (cur >= 1000 ? ++count : count), 0)
+
+console.log(numDeposits1000_1)
+
+const numDeposits1000_red = accounts.flatMap(acc => acc.movements)
+    .reduce((acc, mov) => {
+        acc = mov >= 1000 ? ++acc : acc;
+        return acc
+    }, 0)
+
+console.log(numDeposits1000_red)
+
+//3
+
+const { deposits, withdrawals } = accounts.flatMap(acc => acc.movements)
+    .reduce((sums, cur) => {
+        cur > 0 ? sums.deposits += cur : sums.withdrawals += cur;
+        return sums;
+    }, { deposits: 0, withdrawals: 0 })
+
+console.log(deposits, withdrawals)
+
+//4
+
+const convertTitleCase = function (title) {
+    const capitalize = str => str[0].toUpperCase() + str.slice(1)
+    const exceptions = ['a', 'an', 'and', 'the', 'but', 'or', 'on', 'in', 'with']
+    const titleCase = title.toLowerCase().split(' ').map(word => exceptions.includes(word) ? word : capitalize(word)).join(' ');
+    return capitalize(titleCase);
+}
+
+console.log(convertTitleCase('this is a nice title'))
+
