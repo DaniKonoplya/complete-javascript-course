@@ -1,0 +1,857 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <div id="mf_pix_div"></div>
+    <script type="text/javascript">
+
+
+      (function (doc) {
+        var parameters = {};
+        var urlPixelDrops = {};
+        var DIV_ID = 'mf_pix_div';
+        setUrlPixelDrops = function () {
+          urlPixelDrops = {
+            //'URL' : { 'dropType' : 'equals', 'pixels' : ['PIXEL1', 'PIXEL2'] }
+          }
+        };
+        setParametersDefault = function () {
+          parameters['orderNumber'] = '';
+          parameters['prodID'] = '';
+          parameters['catID'] = '';
+          parameters['cart'] = '';
+          parameters['price'] = '';
+          parameters['href'] = '';
+          parameters['referrer'] = '';
+          parameters['nan_type'] = 'visit';
+          parameters['nan_name'] = 'landing';
+          parameters['ts'] = new Date().getTime();
+          parameters['uid'] = translateUID();
+          parameters['uid3'] = readCookie('uid3');
+          parameters['facebook'] = {
+            'id': ''
+          };
+          parameters['snapchat'] = {
+           'id': 'cd2a3bb9-1033-49f1-a044-f1699fe0a72f'
+          };
+          // JS calls will be transitioned into here.
+          parameters['nextperf'] = {
+            'home' : '',
+            'prod' : '',
+            'cart' : '',
+            'cat'  : '',
+            'conv' : ''
+          };
+        };
+        createCookie = function (name, value, days) {
+  if (days) {
+    var date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    var expires = "; expires=" + date.toGMTString();
+  }
+  else var expires = "";
+  document.cookie = name + "=" + value + expires + ";path=/;domain=.rd.linksynergy.com;";
+};
+readCookie = function (cookie_name) {
+  var ca = doc.cookie.split(';');
+  var cookie_value = "";
+  var max_merchant_keep = 10;
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+    if (c.indexOf(cookie_name) == 0) {
+      cookie_value = c.substring(cookie_name.length + 1);
+      break
+    }
+  }
+  return cookie_value;
+};
+UserId = function() {
+  return readCookie('rmuid')
+};
+
+        drop_js = function(pixel) {
+  var body = document.getElementsByTagName('body')[0].firstChild;
+  var script_jsTag = document.createElement('script');
+  if(script_jsTag) {
+    script_jsTag.setAttribute('type', 'text/javascript');
+    script_jsTag.src = pixel;
+    if(body) body.parentNode.insertBefore(script_jsTag, body);
+  };
+};
+
+drop_img = function(pixel) {
+  var body = document.getElementsByTagName('body')[0].firstChild;
+  var img_tag = document.createElement('img');
+  if(img_tag) {
+    img_tag.src = pixel;
+    if(body) body.parentNode.insertBefore(img_tag, body);
+  };
+};
+
+// also include pix file load script on parent page function
+// may want to use a new segment
+// see TRACK-273
+JSloadScript = function(url, type) {
+  if (window.parent.postMessage != undefined) {
+    if (window.addEventListener != undefined) {
+      window.parent.postMessage({'JSloadScript': {'value': url, 'type': type}}, '*');
+    } else if (window.attachEvent != undefined) {
+      // IE8 and IE9 convert objects to strings when passed via postMessage, so...
+      // we have to serialize and de-serialize the object ourselves
+      window.parent.postMessage("JSloadScript|" + url+ "|" + type + ",", '*');
+    };
+  };
+};
+
+        admin_pixels = function(params, have_cart) {
+  function extractHostname(url) {
+    var hostname;
+
+    if (url.indexOf('://') > -1) {
+      hostname = url.split('/')[2];
+    } else {
+      hostname = url.split('/')[0];
+    }
+
+    hostname = hostname.split(':')[0];
+    hostname = hostname.split('?')[0];
+
+    return hostname;
+  }
+
+  function extractRootDomain(url) {
+    var domain = extractHostname(url);
+    var splitArr = domain.split('.');
+    var arrLen = splitArr.length;
+
+    if (arrLen > 2) {
+      domain = splitArr[arrLen - 2] + "." + splitArr[arrLen - 1];
+      if (splitArr[arrLen - 2].length === 2 && splitArr[arrLen - 1].length === 2) {
+        domain = splitArr[arrLen - 3] + "." + domain;
+      }
+    }
+    return domain;
+  }
+
+  /*Nanigans variables*/
+  var rm_fire3p = params['_rm_fire3p'];
+  var mf_uID = params['uid'];
+  var mf_uID3 = params['uid3'];
+  var mf_price = params['cart'];
+  var mf_ordernumber = params['orderNumber'];
+  var mf_prod_id = params['prodID'];
+  var mf_cat_id = params['catID'];
+  var mf_type = params['nan_type'];
+  var mf_name = params['nan_name'];
+  var mf_referrer = params['referrer'];
+  var mf_href = params['href'];
+  var mf_aid = '';
+  var mf_ts = params['ts'];
+
+  if (mf_ordernumber != '') {
+    mf_price = params['price'];
+  };
+
+ // Don't load pixels if this file has been loaded as a piggyback.
+ for(key in params) {
+   if(key == "rmpb" && params[key] != '') {
+     return '';
+   }
+ }
+
+  var tags = {};
+  var content = '';
+
+  if (have_cart === true) {
+    tags = { 
+    };
+  } else {
+    tags = { 
+    };
+  }
+
+  // TODO: Consolidate internalDomain list
+  var internalDomains=["linksynergy.com", "dpclk.com", "nxtck.com", "mediaforge.com", "jrs5.com", "dc-storm.com", "linksynergy.walmart.com"];
+
+  for(var tag_id in tags) {
+    var pixel = tags[tag_id];
+    var found1p = false;
+    if(!rm_fire3p) {
+      if(pixel !== "") {
+        var pixelDomain = extractRootDomain(pixel)
+        if (internalDomains.indexOf(pixelDomain) > -1) {
+          found1p = true;
+        }
+      }
+    }
+    if(rm_fire3p || found1p) {
+      if(pixel.indexOf('/js/') != -1 || pixel.indexOf('/js?') != -1) {
+        drop_js("//" + pixel);
+      }
+      else {
+        content += "<img id=\"" + tag_id + "\" src=\"//" + pixel + "\" height=\"0\" width=\"0\" alt=\"\"/>";
+      }
+    }
+  }
+  return content;
+}
+
+        handleNextPerf = function() {
+  // Don't call NextPerf when tracking consent only
+  if(parameters['_rm_fire3p'] == false) { return };
+
+  var next_perf = parameters['nextperf'];
+
+  var ptype = parameters['pt'];
+  if (ptype === '' || ptype === undefined ) {
+    if (parameters['orderNumber'] != '' && parameters['price'] != '') {
+      ptype = 'conv';
+    } else if (parameters['cart'] != '') {
+      ptype = 'cart';
+    } else if (parameters['catID'] != '') {
+      ptype = 'cat';
+    } else if (parameters['prodID'] != '') {
+      ptype = 'prod';
+    } else if (parameters['nan_type'] == 'visit') {
+      ptype = 'home';
+    } else if (parameters['minibasket'] == '') {
+      // for JuiceBeauty. see ticket IN-10139
+      ptype = 'minibasket';
+    }
+  }
+
+  // Special code condition for Lacoste.
+  // Do not change this code until they have been moved to SPI.
+  switch (ptype) {
+    case 'category': ptype = 'cat';  break;
+    case 'product':  ptype = 'prod'; break;
+  }
+
+  if (next_perf[ptype] === '') { return };
+
+  var domain = next_perf['domain'] || 'act-us.rd.linksynergy.com';
+  var script_src = "//" + domain + "/act.php?tag=" + next_perf[ptype];
+
+  // added to double track on the new Unified Tracking endpoint(s)
+  var ut_script_src = "//ut.rd.linksynergy.com/t?rmch=np&engine=pix&tag=" + next_perf[ptype];
+
+  if(parameters['r1'] != undefined) { 
+    script_src    += "&r1=" + parameters['r1']; 
+    ut_script_src += "&r1=" + parameters['r1']; 
+  }
+  if(parameters['s1'] != undefined) { 
+    script_src    += "&s1=" + parameters['s1'];
+    ut_script_src += "&s1=" + parameters['s1'];
+  }
+  // for webjet7186. See ticket IN-8186: s2-s8,d1,d2,i1,i2
+  if(parameters['s2'] != undefined) {
+    script_src    += "&s2=" + parameters['s2'];
+    ut_script_src += "&s2=" + parameters['s2'];
+  }
+  if(parameters['s3'] != undefined) {
+    script_src    += "&s3=" + parameters['s3'];
+    ut_script_src += "&s3=" + parameters['s3'];
+  }
+  if(parameters['s4'] != undefined) {
+    script_src    += "&s4=" + parameters['s4'];
+    ut_script_src += "&s4=" + parameters['s4'];
+  }
+  if(parameters['s5'] != undefined) {
+    script_src    += "&s5=" + parameters['s5'];
+    ut_script_src += "&s5=" + parameters['s5'];
+  }
+  if(parameters['s6'] != undefined) {
+    script_src    += "&s6=" + parameters['s6'];
+    ut_script_src += "&s6=" + parameters['s6'];
+  }
+  if(parameters['s7'] != undefined) { 
+    script_src    += "&s7=" + parameters['s7'];
+    ut_script_src += "&s7=" + parameters['s7'];
+  }
+  if(parameters['s8'] != undefined) {
+    script_src    += "&s8=" + parameters['s8'];
+    ut_script_src += "&s8=" + parameters['s8'];
+  }
+  if(parameters['d1'] != undefined) {
+    script_src    += "&d1=" + parameters['d1'];
+    ut_script_src += "&d1=" + parameters['d1'];
+  }
+  if(parameters['d2'] != undefined) {
+    script_src    += "&d2=" + parameters['d2'];
+    ut_script_src += "&d2=" + parameters['d2'];
+  }
+  if(parameters['i1'] != undefined) {
+    script_src    += "&i1=" + parameters['i1'];
+    ut_script_src += "&i1=" + parameters['i1'];
+  }
+  if(parameters['i2'] != undefined) {
+    script_src    += "&i2=" + parameters['i2'];
+    ut_script_src += "&i2=" + parameters['i2'];
+  }
+  // for bosene6781. See ticket IN-7397
+  if(parameters['s'] != undefined) {
+    script_src    += "&s1=" + parameters['s'];
+    ut_script_src += "&s1=" + parameters['s'];
+  }
+  // for landse6993. See ticket IN-8602
+  if(parameters['b1'] != undefined) {
+    script_src    += "&b1=" + parameters['b1'];
+    ut_script_src += "&b1=" + parameters['b1'];
+  }
+  //for webjet7186. See ticket IN-8811
+  if(parameters['price'] != undefined) {
+    script_src    += "&mt=" + parameters['price'];
+    ut_script_src += "&mt=" + parameters['price'];
+  }
+
+  var drop = true;
+
+  switch (ptype) {
+    case 'conv':
+      script_src += "&id=" + parameters['orderNumber'];
+      script_src += "&tvalid=" + (next_perf['tvalid_func'] ? next_perf['tvalid_func']() : (parameters['tvalid'] || '0'));
+
+      // added to double track on the new Unified Tracking endpoint(s)
+      ut_script_src += "&id=" + parameters['orderNumber'];
+      ut_script_src += "&tvalid=" + (next_perf['tvalid_func'] ? next_perf['tvalid_func']() : (parameters['tvalid'] || '0'));
+      
+      if (parameters['prodID'] != '') {
+        script_src    += "&pid=" + parameters['prodID'];
+        ut_script_src += "&pid=" + parameters['prodID'];
+      }
+      break;
+    case 'cart':
+      if (parameters['prodID'] != '') {
+        script_src    += "&pid=" + parameters['prodID'];
+        ut_script_src += "&pid=" + parameters['prodID'];
+      }
+      break;
+    case 'cat':
+      script_src    += "&cid=" + parameters['catID'];
+      ut_script_src += "&cid=" + parameters['catID'];
+      if (parameters['prodID'] != '') {
+        script_src    += "&pid=" + parameters['prodID'];
+        ut_script_src += "&pid=" + parameters['prodID'];
+      }
+      break;
+    case 'prod':
+      script_src    += "&pid=" + parameters['prodID'];
+      ut_script_src += "&pid=" + parameters['prodID'];
+      break;
+    case 'home':
+      break;
+    case 'minibasket':
+      // for JuiceBeauty. see ticket IN-10139
+      if (parameters['prodID'] != '') {
+        script_src    += "&pid=" + parameters['prodID'];
+        ut_script_src += "&pid=" + parameters['prodID'];
+      }
+      break;
+    default:
+      drop = false;
+      break;
+  }
+
+  if (drop) {
+    drop_js(script_src);
+    drop_img(ut_script_src);
+  }
+};
+
+        loadScript = function(src) {
+  var el = document.createElement('script');
+  if (el) {
+    el.setAttribute('type', 'text/javascript');
+    el.src = src;
+    document.body.appendChild(el);
+  }
+};
+
+
+        translateUID = function () {
+  var uid = readCookie('uID');
+  var new_uid = "";
+  for (var i = 0; i < uid.length; i++) {
+    var uid_char = uid.charAt(i).charCodeAt();
+    if ((uid_char < 48) || (uid_char > 122) || ((uid_char > 57) && (uid_char < 65)) || ((uid_char > 90) && (uid_char < 97))) {
+      if (uid_char == 43) new_uid += "mfplusmf";
+      if (uid_char == 61) new_uid += "mfequalmf";
+      if (uid_char == 47) new_uid += "mfslashmf";
+      if (uid_char == 45) new_uid += "mfhyphenmf";
+    }
+    else {
+      new_uid += uid.charAt(i);
+    }
+  }
+  return new_uid;
+};
+        checkForProductCount = function (cookie_name, min_prod_count) {
+  var result = false;
+  var prodCookieVal = readCookie('pID');
+  if (prodCookieVal != '') {
+    var cookie_array = prodCookieVal.split('|');
+    // TODO: Replace "... .MerchantID ..." with the dev equivalent of "... .ParentMerchantID ..." once implemented in tag producer. This function doesn't work for children in Linksynergy
+    var mid = '8712';
+    var mid_count = 0;
+    for (var prod_idx in cookie_array) {
+      // cookie_array[prod_idx] is formatted X[Y,Y,Y]Z -- Split on [, then ], gives us the MID and the array of Y. We can ignore Z
+      var cookieMidAndRest = cookie_array[prod_idx].split('[');
+      if (cookieMidAndRest.length < 2) continue;
+      // Handle the case of a prodID having a ] -- Pop off the MID then join on empty string to get the "rest"
+      var cookieMid = cookieMidAndRest.shift();
+      var rest = cookieMidAndRest.join('[');
+      var fromEnd = rest.lastIndexOf(']');
+      var prods = rest.substring(0, fromEnd);
+
+      if (cookieMid == mid) {
+        var productArray = prods.split(',');
+        mid_count += productArray.length;
+      }
+    }
+    if (mid_count >= min_prod_count) {
+      result = true;
+    }
+  }
+  return result;
+}
+
+        parseQueryString = function () {
+  var params = location.search.split('&');
+  for (var param_index = 0; param_index < params.length; param_index++) {
+    var split_query = params[param_index].split('=');
+    if (split_query.length === 2) {
+      var name = split_query[0];
+      var value = split_query[1];
+      var q_index = name.indexOf('?');
+      if(q_index == 0) {
+        name = name.substring(1);
+      }
+      parameters[name] = value;
+      if (name.indexOf('orderNumber') !== -1) {
+        parameters['nan_type'] = 'purchase';
+        parameters['nan_name'] = 'main';
+      }
+      if (name.indexOf('prodID') !== -1) {
+        parameters['nan_type'] = 'user';
+        parameters['nan_name'] = 'product_view';
+      }
+      if (name.indexOf('catID') !== -1) {
+        parameters['nan_type'] = 'user';
+        parameters['nan_name'] = 'product_view';
+      }
+    }
+  }
+  parameters['_rm_fire3p'] = (parameters['_rm_fire3p'] == null || parameters['_rm_fire3p'] == 'undefined' || parameters['_rm_fire3p'] == 'true');
+};
+
+        processtags = function () {
+          setParametersDefault();
+          parseQueryString();
+          setUrlPixelDrops();
+          handleNextPerf();
+          // temp variables for pixel calls
+          var rm_fire3p = parameters['_rm_fire3p'];
+          var gdpr_consent = parameters['_gdpr_consent'];
+          var mf_uID = parameters['uid'];
+          var mf_uID3 = parameters['uid3'];
+          var mf_price = parameters['cart'];
+          var mf_ordernumber = parameters['orderNumber'];
+          var mf_prod_id = parameters['prodID'];
+          var mf_cat_id = parameters['catID'];
+          var mf_type = parameters['nan_type'];
+          var mf_name = parameters['nan_name'];
+          var have_cart = (parameters['cart'] != '');
+
+          if (mf_ordernumber != '') mf_price = parameters['price'];
+
+          var content = '';
+
+          if(!rm_fire3p) content = "";
+          content += "" + ((typeof rm_fire3p == "undefined" || rm_fire3p) ? "<img src='//match.adsrvr.org/track/cmf/generic?ttd_pid=1i071nc&ttd_tpi=1" + ( typeof gdpr_consent !== "undefined" && gdpr_consent !== null && gdpr_consent !== "" ? ("&gdpr=1&gdpr_consent=" + gdpr_consent ) : "" ) + "' height='0' width='0' alt='' />" : "") + "" + (((typeof rm_fire3p == "undefined" || rm_fire3p) && UserId() != "") ? "<img src='//idsync.rlcdn.com/458359.gif?partner_uid=" + UserId() + "' height='0' width='0' alt='' />" : "") + "";
+          content += appendUrlPixels(rm_fire3p);
+          content += admin_pixels(parameters, have_cart);
+          document.getElementById(DIV_ID).innerHTML = content;
+
+          if(rm_fire3p) implementFacebook();
+          if(rm_fire3p) implementSnapchat();
+        };
+
+        implementFacebook = function () {
+  var fb = parameters['facebook'];
+  if (fb.id == '') return;
+
+  !function (f, b, e, v, n, t, s) {
+    if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments) }
+      ; if (!f._fbq) f._fbq = n;
+    n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0;
+    t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s)
+  }(window,
+    document, 'script', '//connect.facebook.net/en_US/fbevents.js');
+  fbq('init', fb.id);
+  var defaultEvents = facebookEvents({});
+
+  if (fb.defaults != false) {
+    for (e in fb.events) {
+      // use default events overrides if they were provided
+      if (defaultEvents[e]) {
+        var f = fb.events[e]
+        if (f.condition) {
+          defaultEvents[e].condition = f.condition
+        }
+        if (f.payload) {
+          defaultEvents[e].payload = f.payload
+        }
+      }
+    }
+    // use default events
+    fb.events = defaultEvents
+  }
+
+  for (e in fb.events) {
+    var f = fb.events[e]
+    if (f && f.condition(parameters)) {
+      if (f.payload) {
+        fbq('track', e, f.payload(parameters));
+      } else {
+        fbq('track', e);
+      }
+    }
+  }
+};
+
+// replacements is an object with keys indicating desired value substitutions
+// example: {'content_type': 'product_group'}
+facebookEvents = function (replacements) {
+  // content_type default is 'product'
+  var content_type = 'product';
+  if (replacements.content_type) {
+    content_type = replacements.content_type
+  };
+
+  // currency default is 'USD'
+  var currency = 'USD';
+  if (replacements.currency) {
+    currency = replacements.currency
+  };
+
+  decodeProducts = function (prodID, products) {
+    var decoded = decodeURIComponent(prodID);
+    products = decoded.split(',');
+    return products;
+  }
+
+  return {
+    'PageView': { 'condition': function (params) { return true; } },
+    'ViewContent': {
+      'condition': function (params) {
+        if (params['pt'] != undefined && params['pt'] == 'cat' || params['pt'] == 'cart') {
+          return false
+        }
+        return params['prodID'] != undefined && params['prodID'] != ''
+      },
+      'payload': function (params) {
+        var products = [];
+        if (params['prodID'] != undefined && params['prodID'] != '') {
+          products = decodeProducts(params['prodID'], products);
+        }
+        return { 'content_type': content_type, 'content_ids': products }
+      }
+    },
+    'AddToCart': {
+      'condition': function (params) { return params['cart'] != '' },
+      'payload': function (params) {
+        var products = [];
+        if (params['prodID'] != undefined && params['prodID'] != '') {
+          products = decodeProducts(params['prodID'], products);
+        }
+        if (products.length > 0) {
+          return { 'value': params['cart'], 'currency': currency, 'content_type': content_type, 'content_ids': products };
+        } else {
+          return {};
+        }
+      }
+    },
+    'InitiateCheckout': {
+      'condition': function (params) {
+        if (params['pt'] != undefined && params['pt'] == 'checkout') {
+          return true;
+        }
+      }
+    },
+    'Purchase': {
+      'condition': function (params) { return params['orderNumber'] != '' && params['price'] != '' },
+      'payload': function (params) {
+        var products = [];
+        if (params['prodID'] != undefined && params['prodID'] != '') {
+          products = decodeProducts(params['prodID'], products);
+        }
+        // IN-9677 Facebook is rejecting symbols from price this included commas and negative values
+        var price = params['price'].replace(',', '');
+        if (price < 0) { price = 0.00 }
+        // End update from IN-9677
+        return { 'value': price, 'currency': currency, 'content_ids': products, 'content_type': content_type }
+      }
+    }
+  }
+}
+
+        implementSnapchat = function () {
+  var snap = parameters["snapchat"];
+  if (snap.id == "") return;
+  (function (win, doc, sdk_url) {
+    if (win.snaptr) return;
+    var tr = (win.snaptr = function () {
+      tr.handleRequest
+        ? tr.handleRequest.apply(tr, arguments)
+        : tr.queue.push(arguments);
+    });
+    tr.queue = [];
+    var s = "script";
+    var new_script_section = doc.createElement(s);
+    new_script_section.async = !0;
+    new_script_section.src = sdk_url;
+    var insert_pos = doc.getElementsByTagName(s)[0];
+    insert_pos.parentNode.insertBefore(new_script_section, insert_pos);
+  })(window, document, "https://sc-static.net/scevent.min.js");
+  snaptr("init", snap.id);
+  var defaultEvents = snapchatEvents({});
+
+  if (snap.defaults != false) {
+    for (e in snap.events) {
+      // use default events overrides if they were provided
+      if (defaultEvents[e]) {
+        var c = snap.events[e];
+        if (c.condition) {
+          defaultEvents[e].condition = c.condition;
+        }
+        if (c.payload) {
+          defaultEvents[e].payload = c.payload;
+        }
+      }
+    }
+    // use default events
+    snap.events = defaultEvents;
+  }
+
+  for (e in snap.events) {
+    var c = snap.events[e];
+    if (c && c.condition(parameters)) {
+      if (c.payload) {
+        snaptr("track", e, c.payload(parameters));
+      } else {
+        snaptr("track", e);
+      }
+    }
+  }
+};
+
+// replacements is an object with keys indicating desired value substitutions
+// example: {'item_category': 'product_group'}
+snapchatEvents = function (replacements) {
+  // currency default is 'USD'
+  var currency = "USD";
+  if (replacements.currency) {
+    currency = replacements.currency;
+  }
+
+  return {
+    'PAGE_VIEW': {
+      condition: function (params) {
+        return (
+          (params["pt"] != undefined && params["pt"] === "home") ||
+          params["pt"] === "prod" ||
+          params["pt"] === "cat"
+        );
+      }
+    },
+    'VIEW_CONTENT': {
+      condition: function (params) {
+        return (
+          params["pt"] != undefined &&
+          params["pt"] === "prod" &&
+          params["prodID"] != ""
+        );
+      },
+      payload: function (params) {
+        var products = [];
+        if (params["prodID"] != undefined && params["prodID"] != "") {
+          products = params["prodID"].split(",");
+          category = params["catID"];
+        }
+        return { item_category: category, item_ids: products };
+      },
+    },
+    'ADD_CART': {
+      condition: function (params) {
+        return (
+          params["pt"] != undefined &&
+          params["pt"] === "cart" &&
+          params["cart"] != ""
+        );
+      },
+      payload: function (params) {
+        var products = [];
+        if (params["prodID"] != undefined && params["prodID"] != "") {
+          products = params["prodID"].split(",");
+          category = params["catID"];
+        }
+        if (products.length > 0) {
+          return { item_category: category, item_ids: products };
+        } else {
+          return {};
+        }
+      },
+    },
+    // Requires a hashed email but currently we don't pass this param
+    'SIGN_UP': {
+      condition: function (params) {
+        return params["pt"] != undefined && params["pt"] === "sign_up";
+      },
+      payload: function (params) {
+        var hashedEmail = "";
+        return { user_email: hashedEmail };
+      },
+    },
+    'PURCHASE': {
+      condition: function (params) {
+        return (
+          params["pt"] != undefined &&
+          params["pt"] === "conv" &&
+          params["orderNumber"] != "" &&
+          params["price"] != ""
+        );
+      },
+      payload: function (params) {
+        var products = [];
+        if (params["prodID"] != undefined && params["prodID"] != "") {
+          products = params["prodID"].split(",");
+          category = params["catID"];
+        }
+        return {
+          price: params["price"],
+          currency: currency,
+          item_ids: products,
+          item_category: category,
+        };
+      },
+    }
+  };
+};
+
+        appendUrlPixels = function (rm_fire3p) {
+  function extractHostname(url) {
+    var hostname;
+
+    if (url.indexOf('://') > -1) {
+      hostname = url.split('/')[2];
+    } else {
+      hostname = url.split('/')[0];
+    }
+
+    hostname = hostname.split(':')[0];
+    hostname = hostname.split('?')[0];
+
+    return hostname;
+  }
+
+  function extractRootDomain(url) {
+    var domain = extractHostname(url);
+    var splitArr = domain.split('.');
+    var arrLen = splitArr.length;
+
+    if (arrLen > 2) {
+      domain = splitArr[arrLen - 2] + "." + splitArr[arrLen - 1];
+      if (splitArr[arrLen - 2].length === 2 && splitArr[arrLen - 1].length === 2) {
+        domain = splitArr[arrLen - 3] + "." + domain;
+      }
+    }
+    return domain;
+  }
+
+  var content = '';
+  for (var url in urlPixelDrops) {
+    if (urlPixelDrops.hasOwnProperty(url)) {
+      var dropObject = urlPixelDrops[url];
+      var dropCheck = null;
+      switch (dropObject.dropType) {
+        case 'equals':
+          dropCheck = function (href, url) {
+            return href == encodeURIComponent(url)
+          };
+          break;
+        case 'contains':
+          dropCheck = function (href, url) {
+            return href.indexOf(encodeURIComponent(url)) != -1
+          };
+          break;
+        case 'without_querystrings':
+          dropCheck = function (href, url) {
+            var baseUrl = decodeURIComponent(href).split('?')[0];
+            return baseUrl === url;
+          };
+          break;
+      }
+
+      // TODO: Consolidate internalDomain list
+      var internalDomains=["linksynergy.com", "dpclk.com", "nxtck.com", "mediaforge.com", "jrs5.com", "dc-storm.com", "linksynergy.walmart.com"];
+
+      if (dropCheck(parameters['href'], url)) {
+        var pixelArray = dropObject['pixels'];
+        if (!(pixelArray instanceof Array)) pixelArray = [pixelArray];
+        for (var pixel in pixelArray) {
+          var pix = pixelArray[pixel];
+          var found1p = false;
+          if(!rm_fire3p) {
+            if(pixel !== "") {
+              var pixelDomain = extractRootDomain(pixel)
+              if (internalDomains.indexOf(pixelDomain) > -1) {
+                found1p = true;
+              }
+            }
+          }
+          if(rm_fire3p || found1p) {
+            if(pix.indexOf('/js/') != -1 || pix.indexOf('/js?') != -1) {
+              drop_js("//" + pix);
+            }
+            else {
+              content += "<img src='//" + pix + "' height='1' width='1' alt='' />";
+            }
+          }
+        }
+      }
+    }
+  }
+  return content;
+};
+
+        optOut = function () {
+  var result = false;
+  var optOut = "opt-out";
+  var ca = doc.cookie.split(';');
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+    var parts = c.split('='); if (parts.length == 2 && parts[0] == optOut && parts[1] == optOut) result = true;
+  }
+  return result;
+};
+
+if (optOut()) {
+  createCookie('pID', '', -1);
+  createCookie('cID', '', -1);
+}
+else {
+  processtags();
+}
+        if (!window._globalMids) { window._globalMids={}; }
+if (!window._globalMids.Pix) { window._globalMids['Pix'] = {}; }
+window._globalMids.Pix[8712] = 8712;
+if (window.parent.postMessage != undefined) {
+  window.parent.postMessage({'rmvalidation': 8712}, '*');
+};
+
+      })(document);
+    </script>
+  </body>
+</html>

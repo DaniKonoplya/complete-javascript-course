@@ -1,0 +1,5 @@
+2021/03/02-17:08:29.256 507c Reusing MANIFEST C:\Users\dkonoplya\Documents\complete-javascript-course\remote-profile\Default\IndexedDB\https_www.facebook.com_0.indexeddb.leveldb/MANIFEST-000001
+2021/03/02-17:08:58.115 6b4 Level-0 table #5: started
+2021/03/02-17:08:58.128 6b4 Level-0 table #5: 1233 bytes OK
+2021/03/02-17:08:58.131 6b4 Delete type=0 #3
+2021/03/02-17:08:58.132 6b4 Manual compaction at level-0 from (begin) .. (end); will stop at (end)
