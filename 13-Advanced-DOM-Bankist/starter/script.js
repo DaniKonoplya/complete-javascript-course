@@ -365,6 +365,22 @@ const slider = function () {
 }
 slider()
 
+//Global events
+
+document.addEventListener('DOMContentLoaded', (e) => {
+    console.log('HTML parsed and DOM tree built!', e);
+})
+
+window.addEventListener('load', function (e) {
+    console.log('Page fully loaded', e);
+})
+
+// window.addEventListener('beforeunload', function (e) {
+//     e.preventDefault();
+//     console.log(e);
+//     e.returnValue = '';
+// })
+
 // const initialCoords = section1.getBoundingClientRect()
 // console.log(initialCoords);
 

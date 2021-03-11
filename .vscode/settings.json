@@ -1,4 +1,4 @@
 {
-    "python.pythonPath": "C:\\Users\\dkonoplya\\AppData\\Local\\Programs\\Python\\Python39-32\\python.exe",
+    "python.pythonPath": "/root/anaconda3/bin/python",
     "editor.formatOnSave": true
 }
