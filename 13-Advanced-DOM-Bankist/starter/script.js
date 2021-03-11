@@ -349,7 +349,8 @@ const slider = function () {
         document.querySelectorAll('.dots__dot').forEach(dot => {
             dot.classList.remove('dots__dot--active')
         });
-
+        //This how the class with a specific attribute can be selected. 
+        //The elements were previously added to the "dots" element. 
         document.querySelector(`.dots__dot[data-slide="${slide}"]`).classList.add('dots__dot--active')
     }
 
