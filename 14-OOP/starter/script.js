@@ -9,6 +9,10 @@ Person.prototype.calcAge = function () {
     console.log(2037 - this.birthYear);
 }
 
+Person.hey = function () {
+    console.log('Hi there !');
+};
+
 const jonas = new Person('Jonas', 1991);
 console.log(jonas);
 jonas.calcAge()
@@ -62,3 +66,7 @@ one_car.brake()
 two_car.accelerate()
 two_car.accelerate()
 two_car.brake()
+
+console.log(Array.from(document.querySelectorAll('h1')));
+
+Person.hey()

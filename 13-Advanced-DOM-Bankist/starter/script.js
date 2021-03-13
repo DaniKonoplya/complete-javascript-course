@@ -376,6 +376,9 @@ window.addEventListener('load', function (e) {
     console.log('Page fully loaded', e);
 })
 
+console.log('type');
+
+
 // window.addEventListener('beforeunload', function (e) {
 //     e.preventDefault();
 //     console.log(e);
