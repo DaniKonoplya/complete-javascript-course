@@ -70,3 +70,133 @@ two_car.brake()
 console.log(Array.from(document.querySelectorAll('h1')));
 
 Person.hey()
+
+//Additional information about classes.
+
+
+class Account {
+
+    // Public fields 
+    locale = navigator.language
+    // Private fields
+    #movements = [];
+    #pin;
+    //Static method
+
+    constructor(owner, currency, pin) {
+        this.owner = owner;
+        this.currency = currency;
+        this.#pin = pin;
+
+        console.log(`Thanks for opening an account, ${owner}`);
+    }
+
+    deposit(val) {
+        this.#movements.push(val)
+        return this
+    }
+
+    withdraw(val) {
+        this.deposit(-val)
+        return this
+    }
+
+
+    requestLoan(val) {
+        if (this.#approveLoan(val)) {
+            this.deposit(val)
+            console.log('The Loan is approved.');
+            return this
+        }
+    }
+
+    getMovements() {
+        return this.#movements
+    }
+
+    //Static method
+
+    static helper() {
+        console.log('Helper');
+    }
+
+    //Private methods
+
+    #approveLoan(val) {
+        return true
+    }
+
+}
+
+const acc1 = new Account('Jonas', 'EUR', 1111);
+console.log(acc1);
+acc1.deposit(250)
+acc1.withdraw(140)
+acc1.requestLoan(500)
+console.log(acc1.getMovements());
+
+Account.helper()
+
+acc1.deposit(300).deposit(500).withdraw(35).requestLoan(25000).withdraw(4000)
+
+console.log(acc1.getMovements());
+
+
+class CarCl {
+    constructor(make, speed) {
+        this.make = make;
+        this.speed = speed;
+    }
+
+    accelerate() {
+        this.speed += 10;
+        console.log(this.speed);
+        return this
+    }
+
+    brake() {
+        this.speed -= 5;
+        console.log(this.speed);
+    }
+}
+
+class EVCl extends CarCl {
+
+    #charge;
+
+    constructor(make, speed, charge) {
+        super(make, speed)
+        this.#charge = charge
+    }
+
+    get charge() {
+        return this.#charge
+    }
+
+    chargeBattery(val) {
+        this.#charge = val
+        return this
+    }
+
+    brake(val) {
+        if (val <= this.speed) {
+            this.speed -= val
+        }
+        else {
+            this.speed = 0;
+        }
+    }
+
+}
+
+const ev = new EVCl('cc', 30, 25)
+
+console.log(ev);
+console.log(ev.charge);
+
+ev.accelerate()
+ev.brake(10)
+ev.chargeBattery(27)
+console.log(ev.charge);
+
+console.log(ev);

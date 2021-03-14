@@ -33,6 +33,22 @@ class Person {
 
 }
 
+class Student extends Person {
+    constructor(fullName, birthYear, course) {
+        // Have to happen the first. 
+        super(fullName, birthYear)
+        this.course = course
+    }
+
+    intoduce() {
+        console.log(`My name is ${this.fullName} and I study ${this.course}`);
+    }
+
+    calcAge() {
+        console.log(`I'm ${2021 - this.birthYear} years old,but as a student I feel like 100.`);
+    }
+}
+
 const jessica = new Person('Jessica Davis', 1996)
 console.log(jessica);
 
@@ -65,3 +81,9 @@ console.log(account.latest);
 
 console.log(jessica.age);
 Person.hey()
+
+
+const martha = new Student('Marta Grinberg', 1978, 'painting');
+
+console.log(martha);
+martha.calcAge()
